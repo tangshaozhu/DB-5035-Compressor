@@ -91,5 +91,5 @@ If you're not interested in the source code and simply want to try the plugin, y
 
 Enjoy!
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=116738553289351&bvid=BV1hfJL62E7E&cid=39073025494&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-
+视频介绍(Vedio)：
+https://www.bilibili.com/video/BV1hfJL62E7E/?spm_id_from=333.1387.homepage.video_card.click&vd_source=755a32d6ff272ad1739298868f2881c9
