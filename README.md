@@ -11,6 +11,7 @@ As a mixing engineer with over 15 years of professional experience, I have relie
 <img width="4032" height="2272" alt="IMG_20260619_004150" src="https://github.com/user-attachments/assets/5ded82c9-1317-4546-a163-4df52d64fee9" />
 
 
+
 与行业内的普遍认知不同，我们通常认为二极管压缩器（例如 33609 等）都具有非常明显的染色特征。而 5035 的二极管压缩却非常特别，它拥有极其通透的听感。如果使用得当，你可以获得一个非常自然且中频突出的人声或乐器声音。它的染色程度会随着压缩量逐渐增加，而在轻微压缩（约 3dB 以内）时，几乎不会产生明显的染色。
 
 Unlike the common perception of diode compressors in the audio industry—such as the famous 33609, which is generally known for its strong coloration—the diode compressor inside the 5035 is quite unique. It sounds remarkably transparent and open. When used properly, it produces a natural sound with a pleasing midrange presence. Its coloration increases progressively with the amount of gain reduction, while at light compression levels (within roughly 3 dB of gain reduction), it remains almost completely transparent.
@@ -30,6 +31,7 @@ My modeling approach was relatively straightforward. First, I asked Codex to bui
 <img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/34c3a219-e330-42c1-b516-4f9027375fe4" />
 <img width="1004" height="785" alt="image" src="https://github.com/user-attachments/assets/7c9b9a2b-bfaa-406c-b783-16536c27e15b" />
 <img width="1001" height="782" alt="image" src="https://github.com/user-attachments/assets/2157f389-ecea-40a8-8d90-4dbb22c7b720" />
+
 
 截至目前，我认为插件与原型硬件的频率响应已经达到了约 99% 的一致性，瞬态表现约为 90%，而染色特征则约达到 50% 的相似度。在建模过程中，我并没有采用能够完全复制硬件染色的方法（因为我的能力有限，无法实现这一点）。相反，我让 Codex 实现了一种经典二极管饱和模型，并通过代码让染色程度随着压缩量增加而逐渐增强，从而近似模拟硬件的工作方式。
 
