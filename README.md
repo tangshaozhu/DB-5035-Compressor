@@ -37,9 +37,9 @@ My modeling approach was relatively straightforward. First, I asked Codex to bui
 The entire process of calibrating the plugin with Plugin Doctor and repeatedly refining the algorithms through Codex took approximately four days and three nights from start to finish.
 
 
-截至目前，我认为插件与原型硬件的频率响应已经达到了约 99% 的一致性，瞬态表现约为 90%，而染色特征则约达到 50% 的相似度。在建模过程中，我并没有采用能够完全复制硬件染色的方法（因为我的能力有限，无法实现这一点）。相反，我让 Codex 实现了一种经典二极管饱和模型，并通过代码让染色程度随着压缩量增加而逐渐增强，从而近似模拟硬件的工作方式。
+截至目前，我认为插件与原型硬件的频率响应已经达到了约 99% 的一致性，瞬态表现约为 95%，而染色特征则约达到 50% 的相似度。在建模过程中，我并没有采用能够完全复制硬件染色的方法（因为我的能力有限，无法实现这一点）。相反，我让 Codex 实现了一种经典二极管饱和模型，并通过代码让染色程度随着压缩量增加而逐渐增强，从而近似模拟硬件的工作方式。
 
-At the current stage of development, I estimate that the plugin matches the original hardware's frequency response by approximately 99%, its transient behavior by roughly 90%, and its coloration characteristics by around 50%. During development, I did not have the expertise or resources necessary to perfectly reproduce the hardware's non-linear behavior. Instead, I incorporated a classic diode-style saturation model and programmed the amount of coloration to increase progressively with gain reduction, approximating the behavior of the original unit.
+At the current stage of development, I estimate that the plugin matches the original hardware's frequency response by approximately 99%, its transient behavior by roughly 95%, and its coloration characteristics by around 50%. During development, I did not have the expertise or resources necessary to perfectly reproduce the hardware's non-linear behavior. Instead, I incorporated a classic diode-style saturation model and programmed the amount of coloration to increase progressively with gain reduction, approximating the behavior of the original unit.
 
 <img width="1240" height="960" alt="image" src="https://github.com/user-attachments/assets/50900477-9e51-48d8-816d-73b5e6755298" />
 
