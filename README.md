@@ -6,7 +6,7 @@ This project is an audio compressor plugin modeled after the compressor section 
 
 作为一名从业 15 年的混音师，我在工作的过程中，经常依赖一款经典的 Neve 硬件产品——Rupert Neve 5035 前级话放通道条。这台设备实际上拥有 4 个模块，分别是前级、EQ、压缩和染色模块。我建模的是其中的压缩模块，5035 的压缩模块是一个二极管压缩器。
 
-As a mixing engineer with over 15 years of professional experience, I have relied heavily on the Rupert Neve 5035 channel strip throughout my work. The hardware consists of four main sections: a microphone preamp, EQ, compressor, and texture/saturation stage. This project specifically models the compressor section, which is based on a diode compressor design.
+As a mixing engineer with over 15 years of experience, I have relied heavily on the Rupert Neve 5035 channel strip throughout my work. The hardware consists of four main sections: a microphone preamp, EQ, compressor, and texture/saturation stage. This project specifically models the compressor section, which is based on a diode compressor design.
 
 <img width="4032" height="2272" alt="IMG_20260619_004150" src="https://github.com/user-attachments/assets/5ded82c9-1317-4546-a163-4df52d64fee9" />
 
