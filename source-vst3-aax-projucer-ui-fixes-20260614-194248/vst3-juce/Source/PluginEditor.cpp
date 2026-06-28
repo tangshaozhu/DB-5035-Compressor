@@ -1067,8 +1067,9 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     {
         const auto zeroNorm = (0.0f - (-20.0f)) / 23.0f;
         const auto redStart = startAngle + zeroNorm * totalSweep;
+        const auto halfPi = juce::MathConstants<float>::halfPi;
         juce::Path redArc;
-        redArc.addCentredArc (centre.x, centre.y, arcRadius, arcRadius, 0.0f, redStart, endAngle, true);
+        redArc.addCentredArc (centre.x, centre.y, arcRadius, arcRadius, 0.0f, redStart + halfPi, endAngle + halfPi, true);
         g.setColour (juce::Colour (0xffcc4444).withAlpha (0.30f));
         g.strokePath (redArc, juce::PathStrokeType (3.0f));
     }
