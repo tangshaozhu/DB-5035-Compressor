@@ -126,6 +126,8 @@ private:
                         const juce::String& parameterId,
                         const juce::String& labelText,
                         juce::Colour knobColour,
+                        float startAngle,
+                        float endAngle,
                         bool stepped);
     void configureButton (ButtonControl& control, const juce::String& parameterId, const juce::String& labelText);
     void configureCommandButton (CommandButtonControl& control, const juce::String& labelText);
@@ -140,7 +142,8 @@ private:
                         const juce::StringArray& labels,
                         float startAngle,
                         float endAngle,
-                        bool majorLabels);
+                        int tickCount);
+
     void updateValueLabels();
     void updateUndoRedoButtons();
     void updateCompareButtons();

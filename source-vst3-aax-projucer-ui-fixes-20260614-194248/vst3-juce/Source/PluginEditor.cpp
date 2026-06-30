@@ -19,8 +19,8 @@ namespace
     const auto green = juce::Colour (0xff58a07f);
     const auto red = juce::Colour (0xffd65245);
 
-    constexpr auto rotaryStart = juce::MathConstants<float>::pi * 0.78f;
-    constexpr auto rotaryEnd = juce::MathConstants<float>::pi * 2.22f;
+    constexpr auto rotaryStart = juce::MathConstants<float>::pi * 23.f / 30.f;
+    constexpr auto rotaryEnd = juce::MathConstants<float>::pi * 67.f / 30.f;
     constexpr int designWidth = 1120;
     constexpr int designHeight = 450;
 
@@ -326,12 +326,14 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     scaledContent.setInterceptsMouseClicks (false, true);
     addAndMakeVisible (scaledContent);
 
-    configureKnob (knobs[0], knobParameterIds[0], "THRESHOLD", blackKnob, false);
-    configureKnob (knobs[1], knobParameterIds[1], "RATIO", blackKnob, true);
-    configureKnob (knobs[2], knobParameterIds[2], "GAIN dB", redKnob, false);
-    configureKnob (knobs[3], knobParameterIds[3], "TIMING", cream, true);
-    configureKnob (knobs[4], knobParameterIds[4], "S/C HPF", cream, false);
-    configureKnob (knobs[5], knobParameterIds[5], "BLEND %", cream, false);
+    auto pi = juce::MathConstants<float>::pi;
+
+    configureKnob (knobs[0], knobParameterIds[0], "THRESHOLD", blackKnob, rotaryStart, rotaryEnd, false);
+    configureKnob (knobs[1], knobParameterIds[1], "RATIO", blackKnob, pi, pi * 2.0f, true);
+    configureKnob (knobs[2], knobParameterIds[2], "GAIN dB", redKnob, rotaryStart, rotaryEnd, false);
+    configureKnob (knobs[3], knobParameterIds[3], "TIMING", cream, pi, pi * 2.0f, true);
+    configureKnob (knobs[4], knobParameterIds[4], "S/C HPF", cream, rotaryStart, rotaryEnd, false);
+    configureKnob (knobs[5], knobParameterIds[5], "BLEND %", cream, rotaryStart, rotaryEnd, false);
 
     configureButton (buttons[0], buttonParameterIds[0], "COMP IN");
     configureButton (buttons[1], buttonParameterIds[1], "EXT S/C");
@@ -469,19 +471,20 @@ void DB5035AudioProcessorEditor::paint (juce::Graphics& g)
     knobBand.removeFromTop (58);
     knobBand = knobBand.withHeight (250);
     const auto knobWidth = knobBand.getWidth() / 6;
+    constexpr float pi = juce::MathConstants<float>::pi;
 
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "-25", "0", "+20" }, rotaryStart, rotaryEnd, false);
+                   juce::StringArray { "-25","-18", "", "-2", "", "+12", "+20" }, rotaryStart, rotaryEnd, 16);
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "1.5", "3", "6", "8" }, rotaryStart, rotaryEnd, true);
+                   juce::StringArray { "1.5:1", "2:1", "3:1", "4:1", "6:1", "8:1" }, pi, pi * 2, 6);
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "-6", "0", "+12", "+20" }, rotaryStart, rotaryEnd, false);
+                   juce::StringArray { "-6", "0", "+6","+12", "+20" }, rotaryStart, rotaryEnd, 16);
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "FAST", "MED", "SLOW", "AUTO" }, rotaryStart, rotaryEnd, true);
+                   juce::StringArray { "FAST", "MF", "MED", "MS", "SLOW", "AUTO" }, pi, pi * 2, 6);
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "20", "90", "300" }, rotaryStart, rotaryEnd, false);
+                   juce::StringArray { "20", "160", "300" }, rotaryStart, rotaryEnd, 16);
     drawKnobScale (g, knobBand.removeFromLeft (knobWidth).reduced (10, 0),
-                   juce::StringArray { "0", "50", "100" }, rotaryStart, rotaryEnd, false);
+                   juce::StringArray { "0", "50", "100" }, rotaryStart, rotaryEnd, 16);
 }
 
 void DB5035AudioProcessorEditor::resized()
@@ -563,6 +566,8 @@ void DB5035AudioProcessorEditor::configureKnob (KnobControl& control,
                                                 const juce::String& parameterId,
                                                 const juce::String& labelText,
                                                 juce::Colour knobColour,
+                                                float startAngle,
+                                                float endAngle,
                                                 bool stepped)
 {
     control.knobColour = knobColour;
@@ -578,7 +583,7 @@ void DB5035AudioProcessorEditor::configureKnob (KnobControl& control,
 
     control.slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     control.slider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
-    control.slider.setRotaryParameters (rotaryStart, rotaryEnd, true);
+    control.slider.setRotaryParameters (startAngle, endAngle, true);
     control.slider.setMouseDragSensitivity (520);
     control.slider.setVelocityModeParameters (0.32, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
     control.slider.setColour (juce::Slider::thumbColourId, knobColour);
@@ -761,7 +766,7 @@ void DB5035AudioProcessorEditor::drawKnobScale (juce::Graphics& g,
                                                 const juce::StringArray& labels,
                                                 float startAngle,
                                                 float endAngle,
-                                                bool majorLabels)
+                                                int tickCount)
 {
     bounds.removeFromBottom (28);
     bounds.removeFromBottom (24);
@@ -773,20 +778,30 @@ void DB5035AudioProcessorEditor::drawKnobScale (juce::Graphics& g,
     const auto tickOuter = radius + 9.0f;
     const auto tickInner = radius + 2.0f;
 
+    // 绘制外圆弧
+    const auto halfPi = juce::MathConstants<float>::halfPi;
+    juce::Path outerArc;
+    outerArc.addCentredArc (centre.x, centre.y, tickOuter, tickOuter, 0.0f, startAngle + halfPi, endAngle + halfPi, true);
+    g.setColour (line.withAlpha (0.6f));
+    g.strokePath (outerArc, juce::PathStrokeType (1.0f));
+
+    // 绘制内圆弧
+    juce::Path innerArc;
+    innerArc.addCentredArc (centre.x, centre.y, tickInner, tickInner, 0.0f, startAngle + halfPi, endAngle + halfPi, true);
+    g.strokePath (innerArc, juce::PathStrokeType (1.0f));
+
     g.setColour (line);
 
-    const auto tickCount = 17;
     for (int i = 0; i < tickCount; ++i)
     {
         const auto t = (float) i / (float) (tickCount - 1);
         const auto angle = startAngle + t * (endAngle - startAngle);
-        const auto isMajor = i % 5 == 0 || (majorLabels && labels.size() == 6 && i % 4 == 0);
         const auto outer = pointOnCircle (dial, tickOuter, angle);
-        const auto inner = pointOnCircle (dial, isMajor ? tickInner - 4.0f : tickInner, angle);
-        g.drawLine ({ inner, outer }, isMajor ? 2.0f : 1.0f);
+        const auto inner = pointOnCircle (dial, tickInner, angle);
+        g.drawLine ({ inner, outer }, 1.0f);
     }
 
-    g.setFont (uiFont (majorLabels ? 13.0f : 12.0f, juce::Font::bold));
+    g.setFont (uiFont (12.0f, juce::Font::bold));
     g.setColour (text);
 
     for (int i = 0; i < labels.size(); ++i)
@@ -1073,11 +1088,6 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
         g.setColour (juce::Colour (0xffcc4444).withAlpha (0.30f));
         g.strokePath (redArc, juce::PathStrokeType (3.0f));
     }
-
-    g.setFont (uiFont (10.0f, juce::Font::bold));
-    g.setColour (juce::Colour (0xffa09880));
-    const auto modeLabel = isInput ? "INPUT" : (isReduction ? "REDUCTION" : "OUTPUT");
-    g.drawText (modeLabel, juce::roundToInt (centre.x) - 40, juce::roundToInt (centre.y - radius * 0.35f), 80, 14, juce::Justification::centred);
 
     g.setFont (uiFont (8.0f));
     g.setColour (juce::Colour (0xff807868));
