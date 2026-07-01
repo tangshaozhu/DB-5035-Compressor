@@ -22,7 +22,8 @@ namespace
     constexpr auto rotaryStart = juce::MathConstants<float>::pi * 23.f / 30.f;
     constexpr auto rotaryEnd = juce::MathConstants<float>::pi * 67.f / 30.f;
     constexpr int designWidth = 1120;
-    constexpr int designHeight = 450;
+    constexpr int designHeight = 480;
+    constexpr int commandStripHeight = 30;
 
     float getContentScale (juce::Rectangle<int> bounds)
     {
@@ -348,13 +349,15 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     configureCommandButton (oversamplingButton, "OS");
     historyButtons[0].button.onClick = [this] { audioProcessor.getUndoManager().undo(); updateUndoRedoButtons(); };
     historyButtons[1].button.onClick = [this] { audioProcessor.getUndoManager().redo(); updateUndoRedoButtons(); };
+    historyButtons[0].button.setButtonText ("UNDO");
+    historyButtons[1].button.setButtonText ("REDO");
     compareButtons[0].button.setButtonText ("A");
     compareButtons[1].button.setButtonText ("B");
-    compareButtons[2].button.setButtonText (">");
+    compareButtons[2].button.setButtonText ("A>B");
     compareButtons[0].button.onClick = [this] { audioProcessor.selectCompareSlot (0); updateCompareButtons(); updateValueLabels(); };
     compareButtons[1].button.onClick = [this] { audioProcessor.selectCompareSlot (1); updateCompareButtons(); updateValueLabels(); };
     compareButtons[2].button.onClick = [this] { audioProcessor.copyCompareAToB(); updateCompareButtons(); updateValueLabels(); };
-    helpButton.button.setButtonText ("?");
+    helpButton.button.setButtonText ("HELP");
     helpButton.button.onClick = [this]
     {
         helpOverlay.setVisible (true);
@@ -376,6 +379,21 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
             updateOversamplingButton();
         }
     };
+
+    for (auto& hb : historyButtons)
+    {
+        hb.button.setLookAndFeel (&flatCommandLookAndFeel);
+        hb.name.setVisible (false);
+    }
+    for (auto& cb : compareButtons)
+    {
+        cb.button.setLookAndFeel (&flatCommandLookAndFeel);
+        cb.name.setVisible (false);
+    }
+    helpButton.button.setLookAndFeel (&flatCommandLookAndFeel);
+    helpButton.name.setVisible (false);
+    oversamplingButton.button.setLookAndFeel (&flatCommandLookAndFeel);
+    oversamplingButton.name.setVisible (false);
 
     vuModeButton.setButtonText ("OUT");
     vuModeButton.setClickingTogglesState (false);
@@ -419,7 +437,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
 
     setLookAndFeel (&hardwareLookAndFeel);
     setResizable (true, true);
-    setResizeLimits (896, 360, 1680, 675);
+    setResizeLimits (896, 384, 1680, 720);
     if (auto* editorConstrainer = getConstrainer())
         editorConstrainer->setFixedAspectRatio ((double) designWidth / (double) designHeight);
     setSize (designWidth, designHeight);
@@ -432,6 +450,12 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
 
 DB5035AudioProcessorEditor::~DB5035AudioProcessorEditor()
 {
+    for (auto& hb : historyButtons)
+        hb.button.setLookAndFeel (nullptr);
+    for (auto& cb : compareButtons)
+        cb.button.setLookAndFeel (nullptr);
+    helpButton.button.setLookAndFeel (nullptr);
+    oversamplingButton.button.setLookAndFeel (nullptr);
     setLookAndFeel (nullptr);
 }
 
@@ -443,9 +467,10 @@ void DB5035AudioProcessorEditor::paint (juce::Graphics& g)
     g.addTransform (getContentTransform (getLocalBounds()));
 
     const auto designBounds = juce::Rectangle<int> (0, 0, designWidth, designHeight);
-    drawHardwareFrame (g, designBounds.reduced (14));
+    const auto panelBounds = designBounds.withTrimmedTop (commandStripHeight);
+    drawHardwareFrame (g, panelBounds.reduced (14));
 
-    auto module = designBounds.reduced (30);
+    auto module = panelBounds.reduced (30);
     module.removeFromTop (36);
     auto controls = module;
     const auto meterWidth = 150;
@@ -461,10 +486,10 @@ void DB5035AudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (muted);
     g.setFont (uiFont (12.0f, juce::Font::bold));
-    g.drawText ("DIODE BRIDGE COMPRESSOR", 36, 58, 260, 20, juce::Justification::centredLeft);
-    drawSignature (g, designBounds.reduced (30));
+    g.drawText ("DIODE BRIDGE COMPRESSOR", 36, 88, 260, 20, juce::Justification::centredLeft);
+    drawSignature (g, panelBounds.reduced (30));
 
-    auto knobBand = designBounds.reduced (30);
+    auto knobBand = panelBounds.reduced (30);
     knobBand.removeFromTop (84);
     knobBand.removeFromRight (meterWidth + 18);
     knobBand.removeFromLeft (124);
@@ -497,7 +522,17 @@ void DB5035AudioProcessorEditor::resized()
 
 void DB5035AudioProcessorEditor::layoutContent()
 {
-    auto bounds = juce::Rectangle<int> (0, 0, designWidth, designHeight).reduced (30);
+    auto cmdStrip = juce::Rectangle<int> (30, 4, 400, 26);
+    const auto cmdBtnWidth = cmdStrip.getWidth() / 7;
+    historyButtons[0].button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    historyButtons[1].button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    compareButtons[0].button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    compareButtons[1].button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    compareButtons[2].button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    helpButton.button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+    oversamplingButton.button.setBounds (cmdStrip.removeFromLeft (cmdBtnWidth));
+
+    auto bounds = juce::Rectangle<int> (0, commandStripHeight, designWidth, designHeight - commandStripHeight).reduced (30);
     bounds.removeFromTop (84);
 
     const auto meterWidth = 150;
@@ -513,18 +548,8 @@ void DB5035AudioProcessorEditor::layoutContent()
     layoutButton (buttons[0], leftInset.withTrimmedTop (22).withHeight (72).reduced (4, 0));
 
     auto topButtons = bounds.withHeight (62);
-    layoutCommandButton (historyButtons[0], topButtons.removeFromLeft (50).reduced (4, 0));
-    layoutCommandButton (historyButtons[1], topButtons.removeFromLeft (50).reduced (4, 0));
-    topButtons.removeFromLeft (8);
-    layoutCommandButton (compareButtons[0], topButtons.removeFromLeft (48).reduced (4, 0));
-    layoutCommandButton (compareButtons[1], topButtons.removeFromLeft (48).reduced (4, 0));
-    layoutCommandButton (compareButtons[2], topButtons.removeFromLeft (56).reduced (4, 0));
-    topButtons.removeFromLeft (8);
-    layoutCommandButton (helpButton, topButtons.removeFromLeft (50).reduced (4, 0));
-    layoutCommandButton (oversamplingButton, topButtons.removeFromLeft (50).reduced (4, 0));
-    topButtons.removeFromLeft (18);
     layoutButton (buttons[1], topButtons.removeFromLeft (124).reduced (8, 0));
-    topButtons.removeFromLeft (168);
+    topButtons.removeFromLeft (18);
     layoutButton (buttons[2], topButtons.removeFromLeft (96).reduced (8, 0));
 
     bounds.removeFromTop (58);
@@ -954,6 +979,39 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonText (juce::Grap
 
     g.setColour (button.isEnabled() ? cream : muted.withAlpha (0.45f));
     g.setFont (uiFont (16.0f, juce::Font::bold));
+    g.drawText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred);
+}
+
+void DB5035AudioProcessorEditor::FlatCommandLookAndFeel::drawButtonBackground (juce::Graphics& g,
+                                                                               juce::Button& button,
+                                                                               const juce::Colour&,
+                                                                               bool shouldDrawButtonAsHighlighted,
+                                                                               bool shouldDrawButtonAsDown)
+{
+    auto bounds = button.getLocalBounds().toFloat();
+
+    if (shouldDrawButtonAsDown)
+        g.setColour (juce::Colour (0xff383830));
+    else if (shouldDrawButtonAsHighlighted)
+        g.setColour (juce::Colour (0xff2e2e28));
+    else
+        g.setColour (juce::Colour (0xff222220));
+
+    g.fillRect (bounds);
+    g.setColour (juce::Colour (0xff444440));
+    g.drawRect (bounds, 0.5f);
+}
+
+void DB5035AudioProcessorEditor::FlatCommandLookAndFeel::drawButtonText (juce::Graphics& g,
+                                                                         juce::TextButton& button,
+                                                                         bool,
+                                                                         bool)
+{
+    if (button.getButtonText().isEmpty())
+        return;
+
+    g.setColour (button.isEnabled() ? cream : muted.withAlpha (0.45f));
+    g.setFont (uiFont (11.0f));
     g.drawText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred);
 }
 

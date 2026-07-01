@@ -39,6 +39,18 @@ private:
         void drawButtonText (juce::Graphics&, juce::TextButton&, bool, bool) override;
     };
 
+    class FlatCommandLookAndFeel final : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawButtonBackground (juce::Graphics& g,
+                                   juce::Button& button,
+                                   const juce::Colour& backgroundColour,
+                                   bool shouldDrawButtonAsHighlighted,
+                                   bool shouldDrawButtonAsDown) override;
+
+        void drawButtonText (juce::Graphics&, juce::TextButton&, bool, bool) override;
+    };
+
     class VUMeter final : public juce::Component
     {
     public:
@@ -161,6 +173,7 @@ private:
 
     DB5035AudioProcessor& audioProcessor;
     HardwareLookAndFeel hardwareLookAndFeel;
+    FlatCommandLookAndFeel flatCommandLookAndFeel;
     juce::Component scaledContent;
     std::array<KnobControl, 6> knobs;
     std::array<juce::String, 6> knobParameterIds;
