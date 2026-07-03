@@ -1129,6 +1129,9 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     const auto needleTipX = centre.x + std::cos (needleAngle) * needleLength;
     const auto needleTipY = centre.y + std::sin (needleAngle) * needleLength;
 
+    g.setColour (juce::Colours::black.withAlpha (0.25f));
+    g.drawLine (centre.x + 2.0f, centre.y + 2.0f, needleTipX + 2.0f, needleTipY + 2.0f, 1.2f);
+
     g.setColour (juce::Colour (0xff1a1a1a));
     g.drawLine (centre.x, centre.y, needleTipX, needleTipY, 1.0f);
 
