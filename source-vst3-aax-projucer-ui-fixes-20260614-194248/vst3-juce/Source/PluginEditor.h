@@ -93,6 +93,8 @@ private:
         void mouseDown (const juce::MouseEvent& event) override;
         void mouseDoubleClick (const juce::MouseEvent& event) override;
 
+        bool editable = true;
+
     private:
         juce::Label* valueLabel = nullptr;
     };
@@ -105,7 +107,7 @@ private:
             setPaintingIsUnclipped (true);
             addAndMakeVisible (slider);
             addAndMakeVisible (nameLabel);
-            addAndMakeVisible (valueLabel);
+            addChildComponent (valueLabel);
         }
 
         void paint (juce::Graphics& g) override;
