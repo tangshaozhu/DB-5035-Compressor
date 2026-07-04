@@ -51,6 +51,18 @@ private:
         void drawButtonText (juce::Graphics&, juce::TextButton&, bool, bool) override;
     };
 
+    class ScrewLookAndFeel final : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawButtonBackground (juce::Graphics& g,
+                                   juce::Button& button,
+                                   const juce::Colour& backgroundColour,
+                                   bool shouldDrawButtonAsHighlighted,
+                                   bool shouldDrawButtonAsDown) override;
+
+        void drawButtonText (juce::Graphics&, juce::TextButton&, bool, bool) override;
+    };
+
     class VUMeter final : public juce::Component
     {
     public:
@@ -123,6 +135,7 @@ private:
         float scaleStartAngle = 0.0f;
         float scaleEndAngle = 0.0f;
         int scaleTickCount = 0;
+        int labelYOffset = 0;
     };
 
     struct ButtonControl
@@ -185,6 +198,7 @@ private:
     DB5035AudioProcessor& audioProcessor;
     HardwareLookAndFeel hardwareLookAndFeel;
     FlatCommandLookAndFeel flatCommandLookAndFeel;
+    ScrewLookAndFeel screwLookAndFeel;
     juce::Component scaledContent;
     std::array<KnobComponent, 6> knobs;
     std::array<juce::String, 6> knobParameterIds;

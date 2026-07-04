@@ -36,6 +36,11 @@ juce_add_plugin(DB5035Compressor
     PRODUCT_NAME "DB-5035 Qing Compressor"
 )
 
+juce_add_binary_data(DB5035Resources
+    SOURCES
+        Source/Resources/neve_pad2.png
+)
+
 juce_generate_juce_header(DB5035Compressor)
 
 target_sources(DB5035Compressor
@@ -62,6 +67,7 @@ target_compile_definitions(DB5035Compressor
 
 target_link_libraries(DB5035Compressor
     PRIVATE
+        DB5035Resources
         juce::juce_audio_utils
         juce::juce_dsp
     PUBLIC

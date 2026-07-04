@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "BinaryData.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -23,7 +24,7 @@ namespace
     constexpr auto rotaryStart = juce::MathConstants<float>::pi * 20.f / 30.f;
     constexpr auto rotaryEnd = juce::MathConstants<float>::pi * 70.f / 30.f;
     constexpr int designWidth = 1200;
-    constexpr int designHeight = 420;
+    constexpr int designHeight = 199;
     constexpr int commandStripHeight = 28;
 
     float getContentScale (juce::Rectangle<int> bounds)
@@ -345,7 +346,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     knobs[2].scaleTickCount = 16;
     knobs[3].scaleLabels = juce::StringArray { "FAST", "MF", "MED", "MS", "SLOW", "AUTO" };
     knobs[3].scaleTickCount = 6;
-    knobs[4].scaleLabels = juce::StringArray { "20", "160", "300" };
+    knobs[4].scaleLabels = juce::StringArray { "20", "300" };
     knobs[4].scaleTickCount = 16;
     knobs[5].scaleLabels = juce::StringArray { "0", "50", "100" };
     knobs[5].scaleTickCount = 16;
@@ -411,18 +412,19 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     oversamplingButton.name.setVisible (false);
 
     static const VUMeter::Mode vuModes[] = { VUMeter::Mode::input, VUMeter::Mode::output, VUMeter::Mode::reduction };
-    static const juce::String vuLabels[] = { "IN", "OUT", "RED" };
+    static const juce::String vuLabels[] = { "IN", "OUT", "REDUCTION" };
     const auto initialVuMode = juce::jlimit (0, 2, audioProcessor.getVuMode());
     vuMeter.setMode (vuModes[initialVuMode]);
     vuModeButton.setButtonText (vuLabels[initialVuMode]);
     vuModeButton.setClickingTogglesState (false);
     vuModeButton.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff1c1d1b));
     vuModeButton.setColour (juce::TextButton::buttonOnColourId, cream);
-    vuModeButton.setColour (juce::TextButton::textColourOffId, cream);
+    vuModeButton.setColour (juce::TextButton::textColourOffId, juce::Colours::white);
+    vuModeButton.setLookAndFeel (&screwLookAndFeel);
     vuModeButton.onClick = [this]
     {
         static const VUMeter::Mode modes[] = { VUMeter::Mode::input, VUMeter::Mode::output, VUMeter::Mode::reduction };
-        static const juce::String labels[] = { "IN", "OUT", "RED" };
+        static const juce::String labels[] = { "IN", "OUT", "REDUCTION" };
         const auto currentMode = vuMeter.getMode();
         int nextIndex = 0;
 
@@ -447,7 +449,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
 
     setLookAndFeel (&hardwareLookAndFeel);
     setResizable (true, true);
-    setResizeLimits (960, 364, 1920, 1200);
+    setResizeLimits (400, 100, 1920, 1200);
     getConstrainer()->setFixedAspectRatio ((double) designWidth / (double) (designHeight + commandStripHeight));
     setSize (designWidth, designHeight + commandStripHeight);
     startTimerHz (30);
@@ -478,10 +480,19 @@ void DB5035AudioProcessorEditor::paint (juce::Graphics& g)
     const auto scale = getContentScale (getLocalBounds());
     const auto panelH = juce::jmax (designHeight, juce::roundToInt (((float) getHeight() - (float) commandStripHeight) / scale));
     const auto panelBounds = juce::Rectangle<int> (0, 0, designWidth, panelH);
-    drawHardwareFrame (g, panelBounds);
 
-    const int titleX = 36;
-    const int titleY = 185;
+    // 用 neve_pad2.png 绘制主面板背景，缩放到与面板同宽
+    static const auto panelImage = juce::ImageCache::getFromMemory (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
+    if (panelImage.isValid())
+        g.drawImageWithin (panelImage, panelBounds.getX(), panelBounds.getY(),
+                           panelBounds.getWidth(), panelBounds.getHeight(),
+                           juce::RectanglePlacement::xLeft | juce::RectanglePlacement::yTop
+                         | juce::RectanglePlacement::stretchToFit);
+    else
+        drawHardwareFrame (g, panelBounds);
+
+    const int titleX = 26;
+    const int titleY = 75;
     const int titleLineH = 28;
 
     const auto titleFont = juce::Font (juce::FontOptions ("MyriadPro-Regular", 25.37f, juce::Font::plain));
@@ -512,21 +523,30 @@ void DB5035AudioProcessorEditor::resized()
     helpOverlay.setBounds (getLocalBounds());
 }
 
+void DB5035AudioProcessorEditor::layoutButton (ButtonControl& control, juce::Rectangle<int> bounds)
+{
+    const auto btnBounds = bounds.withSizeKeepingCentre (34, 34);
+    control.button.setBounds (btnBounds);
+    control.name.setBounds (bounds.withHeight (26).withY (bounds.getY()));
+}
+
 void DB5035AudioProcessorEditor::layoutContent()
 {
-    layoutButton (buttons[0], juce::Rectangle<int> (96, 65, 51, 54));
-    layoutButton (buttons[1], juce::Rectangle<int> (288, 120, 80, 54));
-    layoutButton (buttons[2], juce::Rectangle<int> (498, 120, 60, 54));
+    layoutButton (buttons[0], juce::Rectangle<int> (970, 5, 80, 60));
+    layoutButton (buttons[1], juce::Rectangle<int> (298, 8, 80, 60));
+    layoutButton (buttons[2], juce::Rectangle<int> (478, 8, 80, 60));
 
-    knobs[4].setBounds (150, 126, 155, 120);
-    knobs[0].setBounds (250, 206, 155, 120);
-    knobs[1].setBounds (350, 126, 155, 120);
-    knobs[2].setBounds (450, 206, 155, 120);
-    knobs[3].setBounds (550, 126, 155, 120);
-    knobs[5].setBounds (650, 206, 155, 120);
+    knobs[4].setBounds (170, 13, 155, 120);
+    knobs[0].setBounds (260, 90, 155, 120);
+    knobs[1].labelYOffset = -13;
+    knobs[1].setBounds (350, 26, 155, 120);
+    knobs[2].setBounds (440, 90, 155, 120);
+    knobs[3].labelYOffset = -13;
+    knobs[3].setBounds (530, 26, 155, 120);
+    knobs[5].setBounds (620, 90, 155, 120);
 
-    vuMeter.setBounds (828, 106, 220, 182);
-    vuModeButton.setBounds (915, 314, 56, 20);
+    vuMeter.setBounds (776, 24, 190, 90);
+    vuModeButton.setBounds (835, 155, 70, 56);
 }
 
 void DB5035AudioProcessorEditor::layoutCommandStrip()
@@ -659,28 +679,36 @@ void DB5035AudioProcessorEditor::KnobComponent::paint (juce::Graphics& g)
 
     const auto dial = slider.getBounds().toFloat();
     const auto centre = dial.getCentre();
-    const auto radius = juce::jmin (dial.getWidth(), dial.getHeight()) * 0.48f;
-    const auto tickOuter = radius + 7.0f;
+    const auto radius = juce::jmin (dial.getWidth(), dial.getHeight()) * 0.46f;
+    const auto innerArcR = radius + 1.0f;
     const auto tickInner = radius + 1.5f;
+    const auto tickOuter = radius + 7.0f;
+    const auto outerArcR = tickOuter;
 
     const auto halfPi = juce::MathConstants<float>::halfPi;
-    juce::Path outerArc;
-    outerArc.addCentredArc (centre.x, centre.y, tickOuter, tickOuter, 0.0f, scaleStartAngle + halfPi, scaleEndAngle + halfPi, true);
-    g.setColour (juce::Colour (0xffffffff).withAlpha (0.8f));
-    g.strokePath (outerArc, juce::PathStrokeType (2.0f));
 
     juce::Path innerArc;
-    innerArc.addCentredArc (centre.x, centre.y, tickInner, tickInner, 0.0f, scaleStartAngle + halfPi, scaleEndAngle + halfPi, true);
+    innerArc.addCentredArc (centre.x, centre.y, innerArcR, innerArcR, 0.0f, scaleStartAngle + halfPi, scaleEndAngle + halfPi, true);
+    g.setColour (juce::Colour (0xffffffff).withAlpha (0.8f));
     g.strokePath (innerArc, juce::PathStrokeType (1.0f));
 
+    juce::Path outerArc;
+    outerArc.addCentredArc (centre.x, centre.y, outerArcR, outerArcR, 0.0f, scaleStartAngle + halfPi, scaleEndAngle + halfPi, true);
+    g.strokePath (outerArc, juce::PathStrokeType (2.0f));
+
     g.setColour (juce::Colour (0xffffffff));
+    bool isStepped = scaleEndAngle - scaleStartAngle < juce::MathConstants<float>::pi * 1.01f;
 
     for (int i = 0; i < scaleTickCount; ++i)
     {
+        auto local_tickOuter = tickOuter;
+        if (!isStepped && (i == 0 || i == scaleTickCount - 1)) {
+            local_tickOuter = tickOuter + 4.0f; // Make the first and last ticks longer
+        }
         const auto t = (float) i / (float) (scaleTickCount - 1);
         const auto angle = scaleStartAngle + t * (scaleEndAngle - scaleStartAngle);
-        const auto outer = juce::Point<float> { centre.x + std::cos (angle) * tickOuter,
-                                                 centre.y + std::sin (angle) * tickOuter };
+        const auto outer = juce::Point<float> { centre.x + std::cos (angle) * local_tickOuter,
+                                                 centre.y + std::sin (angle) * local_tickOuter };
         const auto inner = juce::Point<float> { centre.x + std::cos (angle) * tickInner,
                                                  centre.y + std::sin (angle) * tickInner };
         g.drawLine ({ inner, outer }, 1.0f);
@@ -709,17 +737,10 @@ void DB5035AudioProcessorEditor::KnobComponent::resized()
     slider.setBounds (sliderBounds);
 
     const auto sliderBottom = slider.getBounds().getBottom();
-    nameLabel.setBounds (0, sliderBottom + 16, getWidth(), 20);
+    nameLabel.setBounds (0, sliderBottom + 16 + labelYOffset, getWidth(), 20);
 
     const auto sliderCentre = slider.getBounds().getCentre();
     valueLabel.setBounds (sliderCentre.x - 30, sliderCentre.y - 10, 60, 20);
-}
-
-void DB5035AudioProcessorEditor::layoutButton (ButtonControl& control, juce::Rectangle<int> bounds)
-{
-    control.name.setBounds (bounds.removeFromTop (26));
-    const auto diameter = juce::jmin (50, bounds.getHeight() + 14);
-    control.button.setBounds (bounds.withSizeKeepingCentre (diameter, diameter));
 }
 
 void DB5035AudioProcessorEditor::drawHardwareFrame (juce::Graphics& g, juce::Rectangle<int> bounds)
@@ -737,7 +758,7 @@ void DB5035AudioProcessorEditor::drawHardwareFrame (juce::Graphics& g, juce::Rec
 
 void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g, juce::Rectangle<int> bounds)
 {
-    auto signatureArea = juce::Rectangle<int> (997, 54, 58, 71);
+    auto signatureArea = juce::Rectangle<int> (997+120, 54+8, 58, 71);
 
     juce::Graphics::ScopedSaveState state (g);
     g.addTransform (juce::AffineTransform::rotation (-0.10f,
@@ -916,8 +937,8 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawRotarySlider (juce::Gr
     g.setGradientFill (juce::ColourGradient (knobColour.brighter (0.28f), bounds.getTopLeft(),
                                              knobColour.darker (0.55f), bounds.getBottomRight(), false));
     g.fillEllipse (bounds);
-    g.setColour (juce::Colours::black.withAlpha (0.85f));
-    g.drawEllipse (bounds, 2.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.45f));
+    g.drawEllipse (bounds, 1.0f);
 
     const auto cap = bounds.reduced (radius * 0.22f);
     g.setColour (knobColour.brighter (0.12f));
@@ -1010,6 +1031,30 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonText (juce::Grap
     g.drawText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred);
 }
 
+void DB5035AudioProcessorEditor::ScrewLookAndFeel::drawButtonBackground (juce::Graphics&,
+                                                                          juce::Button&,
+                                                                          const juce::Colour&,
+                                                                          bool,
+                                                                          bool)
+{
+}
+
+void DB5035AudioProcessorEditor::ScrewLookAndFeel::drawButtonText (juce::Graphics& g,
+                                                                     juce::TextButton& button,
+                                                                     bool,
+                                                                     bool)
+{
+    if (button.getButtonText().isEmpty())
+        return;
+
+    const auto bounds = button.getLocalBounds().toFloat();
+    const auto textY = 30.0f;
+
+    g.setColour (juce::Colours::white);
+    g.setFont (juce::FontOptions ("MyriadPro-Regular", 11.3f, juce::Font::plain));
+    g.drawText (button.getButtonText(), bounds.withTop ((int) textY).toNearestInt(), juce::Justification::centredTop);
+}
+
 void DB5035AudioProcessorEditor::FlatCommandLookAndFeel::drawButtonBackground (juce::Graphics& g,
                                                                                juce::Button& button,
                                                                                const juce::Colour&,
@@ -1098,10 +1143,10 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     const auto radius = meterH * 1.05f;
 
     g.setColour (juce::Colour (0xfff5e6b8));
-    g.fillRoundedRectangle (meterBounds, 6.0f);
+    g.fillRect (meterBounds);
 
     g.setColour (juce::Colour (0xff2a2520));
-    g.drawRoundedRectangle (meterBounds, 6.0f, 2.5f);
+    g.drawRect (meterBounds, 2.5f);
 
     juce::Graphics::ScopedSaveState clipState (g);
     g.reduceClipRegion (meterBounds.toNearestInt());
