@@ -16,8 +16,8 @@ namespace
     const auto blackKnob = juce::Colour (0xff333f54);
     const auto redKnob = juce::Colour (0xffa23744);
     const auto creamKnob = juce::Colour (0xffccd1db);
-    const auto amber = juce::Colour (0xffd4aa55);
-    const auto green = juce::Colour (0xff58a07f);
+    const auto amber = juce::Colour (0xffffcc22);
+    const auto green = juce::Colour (0xff22ee22);
     const auto red = juce::Colour (0xffd65245);
 
     constexpr auto rotaryStart = juce::MathConstants<float>::pi * 20.f / 30.f;
@@ -351,8 +351,11 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     knobs[5].scaleTickCount = 16;
 
     configureButton (buttons[0], buttonParameterIds[0], "COMP IN");
+    buttons[0].button.setColour (juce::TextButton::buttonOnColourId, green);
     configureButton (buttons[1], buttonParameterIds[1], "S/C INSERT");
+    buttons[1].button.setColour (juce::TextButton::buttonOnColourId, green);
     configureButton (buttons[2], buttonParameterIds[2], "FAST");
+    buttons[2].button.setColour (juce::TextButton::buttonOnColourId, amber);
 
     configureCommandButton (historyButtons[0], juce::String::fromUTF8 ("↶"));
     configureCommandButton (historyButtons[1], juce::String::fromUTF8 ("↷"));
@@ -629,8 +632,9 @@ void DB5035AudioProcessorEditor::configureButton (ButtonControl& control, const 
 
     control.button.setButtonText ("");
     control.button.setClickingTogglesState (true);
-    control.button.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff252622));
-    control.button.setColour (juce::TextButton::buttonOnColourId, cream);
+    control.button.setPaintingIsUnclipped (true);
+    control.button.setColour (juce::TextButton::buttonColourId, juce::Colour (0xffeaeef4));
+    control.button.setColour (juce::TextButton::buttonOnColourId, green);
 
     control.attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.getValueTreeState(), parameterId, control.button);
@@ -719,7 +723,7 @@ void DB5035AudioProcessorEditor::KnobComponent::resized()
 void DB5035AudioProcessorEditor::layoutButton (ButtonControl& control, juce::Rectangle<int> bounds)
 {
     control.name.setBounds (bounds.removeFromTop (26));
-    const auto diameter = juce::jmin (36, bounds.getHeight());
+    const auto diameter = juce::jmin (50, bounds.getHeight() + 14);
     control.button.setBounds (bounds.withSizeKeepingCentre (diameter, diameter));
 }
 
@@ -933,22 +937,68 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawRotarySlider (juce::Gr
 void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonBackground (juce::Graphics& g,
                                                                            juce::Button& button,
                                                                            const juce::Colour&,
-                                                                           bool shouldDrawButtonAsHighlighted,
-                                                                           bool shouldDrawButtonAsDown)
+                                                                           bool,
+                                                                           bool)
 {
-    auto bounds = button.getLocalBounds().toFloat().reduced (2.0f);
+    // fullBounds = 按钮完整区域，bounds = 椭圆绘制区域（留出光晕空间）
+    const auto fullBounds = button.getLocalBounds().toFloat();
+    const auto ellipseInset = 7.0f;   // 椭圆到按钮边缘的距离，越大光晕空间越宽
+    auto bounds = fullBounds.reduced (ellipseInset);
     const auto on = button.getToggleState();
-    const auto base = on ? cream : juce::Colour (0xff1c1d1b);
+    const auto glowColour = button.findColour (juce::TextButton::buttonOnColourId);
+    const auto base = juce::Colour (0xffeaeef4);  // 按钮底色 #EAEEF4
+    const auto cx = bounds.getCentreX();
+    const auto cy = bounds.getCentreY();
 
-    g.setColour (juce::Colours::black.withAlpha (0.42f));
-    g.fillEllipse (bounds.translated (2.0f, 3.0f));
+    if (!on)
+    {
+        // 阴影：偏移 (2,3)，透明度 0.42
+        g.setColour (juce::Colours::black.withAlpha (0.42f));
+        g.fillEllipse (bounds.translated (2.0f, 3.0f));
 
-    g.setGradientFill (juce::ColourGradient (base.brighter (on ? 0.08f : 0.18f), bounds.getTopLeft(),
-                                             base.darker (on ? 0.15f : 0.38f), bounds.getBottomRight(), false));
-    g.fillEllipse (bounds);
+        // 按钮主体：左上亮→右下暗的线性渐变
+        g.setGradientFill (juce::ColourGradient (base.brighter (0.18f), bounds.getTopLeft(),
+                                                 base.darker (0.38f), bounds.getBottomRight(), false));
+        g.fillEllipse (bounds);
 
-    g.setColour (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted ? amber : juce::Colour (0xff0c0c0a));
-    g.drawEllipse (bounds, 1.5f);
+        // 边框
+        g.setColour (juce::Colour (0xaa0c0c0a));
+        g.drawEllipse (bounds, 1.5f);
+    }
+    else
+    {
+        // ── 第1层：外层弱光晕 ──
+        // 径向渐变：中心 glowColour@0.22 → 边缘透明，覆盖 fullBounds
+        g.setGradientFill (juce::ColourGradient (glowColour.withAlpha (0.22f), { cx, cy },
+                                                 glowColour.withAlpha (0.0f), fullBounds.getCentre().toFloat(), true));
+        g.fillEllipse (fullBounds);
+
+        // ── 第2层：内层强光晕 ──
+        // 径向渐变：中心 glowColour@0.50 → 边缘透明，椭圆外扩 4px
+        const auto innerGlowExpand = 4.0f;  // 内层光晕超出椭圆的距离
+        g.setGradientFill (juce::ColourGradient (glowColour.withAlpha (0.70f), { cx, cy },
+                                                 glowColour.withAlpha (0.0f), { cx, cy + bounds.getHeight() * 0.5f + innerGlowExpand }, true));
+        g.fillEllipse (bounds.expanded (innerGlowExpand));
+
+        // ── 第3层：按钮主体 ──
+        // 按下时渲染为灯光颜色，微弱渐变保留立体感
+        g.setGradientFill (juce::ColourGradient (glowColour.brighter (0.6f), bounds.getTopLeft(),
+                                                 glowColour.darker (0.20f), bounds.getBottomRight(), false));
+        g.fillEllipse (bounds);
+
+        // ── 第4层：LED 过曝白点 ──
+        // 径向渐变：中心纯白 → 透明，范围由 hotspotShrink 控制
+        // hotspotShrink 越大→白点越小，gradientRadius 越大→渐变越平缓
+        const auto hotspotShrink = 0.1f;     // 白点缩小比例 (0.15 = 缩到 70% 大小)
+        const auto gradientRadius = 0.3f;    // 渐变半径占椭圆高度的比例
+        g.setGradientFill (juce::ColourGradient (juce::Colours::white.withAlpha (0.5f), { cx, cy },
+                                                 juce::Colours::white.withAlpha (0.2f), { cx, cy + bounds.getHeight() * gradientRadius }, true));
+        g.fillEllipse (bounds.reduced (bounds.getWidth() * hotspotShrink, bounds.getHeight() * hotspotShrink));
+
+        // 边框
+        g.setColour (juce::Colour (0x88101016));
+        g.drawEllipse (bounds, 1.5f);
+    }
 }
 
 void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonText (juce::Graphics& g,
@@ -959,7 +1009,8 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonText (juce::Grap
     if (button.getButtonText().isEmpty())
         return;
 
-    g.setColour (button.isEnabled() ? cream : muted.withAlpha (0.45f));
+    const auto on = button.getToggleState();
+    g.setColour (on ? juce::Colour (0xff1a1a1a) : juce::Colour (0xff3a3a3a));
     g.setFont (uiFont (16.0f, juce::Font::bold));
     g.drawText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred);
 }
