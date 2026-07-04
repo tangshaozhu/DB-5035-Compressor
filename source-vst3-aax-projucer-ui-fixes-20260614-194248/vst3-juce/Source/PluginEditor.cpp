@@ -6,15 +6,16 @@
 namespace
 {
     const auto background = juce::Colour (0xff12120f);
-    const auto panel = juce::Colour (0xff30312d);
-    const auto panelTop = juce::Colour (0xff41423d);
-    const auto panelDark = juce::Colour (0xff20211d);
-    const auto line = juce::Colour (0xffcbc7bb);
-    const auto text = juce::Colour (0xffeee8d8);
-    const auto muted = juce::Colour (0xffd6d0bf);
+    const auto panel = juce::Colour (0xff2d3945);
+    const auto panelTop = juce::Colour (0xff3d4955);
+    const auto panelDark = juce::Colour (0xff1d2935);
+    const auto line = juce::Colours::white;
+    const auto text = juce::Colours::white;
+    const auto muted = juce::Colours::white;
     const auto cream = juce::Colour (0xffe6dfc5);
-    const auto blackKnob = juce::Colour (0xff171817);
-    const auto redKnob = juce::Colour (0xffc74743);
+    const auto blackKnob = juce::Colour (0xff333f54);
+    const auto redKnob = juce::Colour (0xffa23744);
+    const auto creamKnob = juce::Colour (0xffccd1db);
     const auto amber = juce::Colour (0xffd4aa55);
     const auto green = juce::Colour (0xff58a07f);
     const auto red = juce::Colour (0xffd65245);
@@ -331,10 +332,10 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     configureKnob (knobs[1], knobParameterIds[1], "RATIO", blackKnob, pi, pi * 2.0f, true);
     knobs[1].slider.editable = false;
     configureKnob (knobs[2], knobParameterIds[2], "GAIN dB", redKnob, rotaryStart, rotaryEnd, false);
-    configureKnob (knobs[3], knobParameterIds[3], "TIMING", cream, pi, pi * 2.0f, true);
+    configureKnob (knobs[3], knobParameterIds[3], "TIMING", creamKnob, pi, pi * 2.0f, true);
     knobs[3].slider.editable = false;
-    configureKnob (knobs[4], knobParameterIds[4], "S/C HPF", cream, rotaryStart, rotaryEnd, false);
-    configureKnob (knobs[5], knobParameterIds[5], "BLEND %", cream, rotaryStart, rotaryEnd, false);
+    configureKnob (knobs[4], knobParameterIds[4], "S/C HPF", blackKnob, rotaryStart, rotaryEnd, false);
+    configureKnob (knobs[5], knobParameterIds[5], "BLEND %", creamKnob, rotaryStart, rotaryEnd, false);
 
     knobs[0].scaleLabels = juce::StringArray { "-25", "", "-18", "", "", "-2", "", "", "+12","", "+20" };
     knobs[0].scaleTickCount = 16;
