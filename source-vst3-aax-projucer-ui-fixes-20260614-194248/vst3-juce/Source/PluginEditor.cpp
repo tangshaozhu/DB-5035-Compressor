@@ -534,7 +534,9 @@ void DB5035AudioProcessorEditor::layoutContent()
 {
     layoutButton (buttons[0], juce::Rectangle<int> (970, 5, 80, 60));
     layoutButton (buttons[1], juce::Rectangle<int> (298, 8, 80, 60));
+    buttons[1].button.setBounds (buttons[1].button.getBounds().translated (0, 7));
     layoutButton (buttons[2], juce::Rectangle<int> (478, 8, 80, 60));
+    buttons[2].button.setBounds (buttons[2].button.getBounds().translated (0, 7));
 
     knobs[4].setBounds (170, 13, 155, 120);
     knobs[0].setBounds (260, 90, 155, 120);
@@ -545,7 +547,7 @@ void DB5035AudioProcessorEditor::layoutContent()
     knobs[3].setBounds (530, 26, 155, 120);
     knobs[5].setBounds (620, 90, 155, 120);
 
-    vuMeter.setBounds (776, 24, 190, 90);
+    vuMeter.setBounds (775, 24, 192, 88);
     vuModeButton.setBounds (835, 155, 70, 56);
 }
 
@@ -758,7 +760,7 @@ void DB5035AudioProcessorEditor::drawHardwareFrame (juce::Graphics& g, juce::Rec
 
 void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g, juce::Rectangle<int> bounds)
 {
-    auto signatureArea = juce::Rectangle<int> (997+120, 54+8, 58, 71);
+    auto signatureArea = juce::Rectangle<int> (1080, 62, 58, 71);
 
     juce::Graphics::ScopedSaveState state (g);
     g.addTransform (juce::AffineTransform::rotation (-0.10f,
@@ -1148,7 +1150,7 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     const auto centre = juce::Point<float> (meterBounds.getCentreX(), meterBounds.getBottom() + meterH * 0.30f);
     const auto radius = meterH * 1.05f;
 
-    g.setColour (juce::Colour (0xfff5e6b8));
+    g.setColour (juce::Colour (0xfff5e6a0));
     g.fillRect (meterBounds);
 
     g.setColour (juce::Colour (0xff2a2520));
