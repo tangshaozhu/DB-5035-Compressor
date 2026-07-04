@@ -745,7 +745,7 @@ void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g, juce::Rectang
                                                      (float) signatureArea.getCentreY()));
 
     const auto signatureText = juce::String::fromUTF8 ("\xe9\x9d\x92");
-    auto inkArea = signatureArea.reduced (30, 4).translated (-3, 0);
+    auto inkArea = signatureArea.reduced (4, 4).translated (-3, 0);
     const auto signatureFont = juce::FontOptions (signatureTypefaceName(), 52.0f, juce::Font::plain);
 
     g.setFont (signatureFont);
