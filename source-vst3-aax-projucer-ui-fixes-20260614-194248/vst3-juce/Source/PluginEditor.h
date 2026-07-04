@@ -117,6 +117,7 @@ private:
         KnobComponent()
         {
             setPaintingIsUnclipped (true);
+            slider.setPaintingIsUnclipped (true);
             addAndMakeVisible (slider);
             addAndMakeVisible (nameLabel);
             addChildComponent (valueLabel);

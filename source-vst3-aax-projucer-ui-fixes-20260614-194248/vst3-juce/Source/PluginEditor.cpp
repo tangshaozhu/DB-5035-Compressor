@@ -681,7 +681,7 @@ void DB5035AudioProcessorEditor::KnobComponent::paint (juce::Graphics& g)
     const auto centre = dial.getCentre();
     const auto radius = juce::jmin (dial.getWidth(), dial.getHeight()) * 0.46f;
     const auto innerArcR = radius + 1.0f;
-    const auto tickInner = radius + 1.5f;
+    const auto tickInner = radius + 1.0f;
     const auto tickOuter = radius + 7.0f;
     const auto outerArcR = tickOuter;
 
@@ -702,8 +702,8 @@ void DB5035AudioProcessorEditor::KnobComponent::paint (juce::Graphics& g)
     for (int i = 0; i < scaleTickCount; ++i)
     {
         auto local_tickOuter = tickOuter;
-        if (!isStepped && (i == 0 || i == scaleTickCount - 1)) {
-            local_tickOuter = tickOuter + 4.0f; // Make the first and last ticks longer
+        if (i == 0 || i == scaleTickCount - 1) {
+            local_tickOuter = tickOuter + (!isStepped ? 4.0f : 1.0f); // Make the first and last ticks longer
         }
         const auto t = (float) i / (float) (scaleTickCount - 1);
         const auto angle = scaleStartAngle + t * (scaleEndAngle - scaleStartAngle);
@@ -931,8 +931,11 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawRotarySlider (juce::Gr
     const auto radius = size * 0.5f;
     const auto centre = bounds.getCentre();
 
-    g.setColour (juce::Colours::black.withAlpha (0.35f));
-    g.fillEllipse (bounds.translated (3.0f, 4.0f));
+    for (int i = 3; i >= 0; --i)
+    {
+        g.setColour (juce::Colours::black.withAlpha (0.09f * (4 - i)));
+        g.fillEllipse (bounds.translated (3.0f, 4.0f).expanded ((float) i));
+    }
 
     g.setGradientFill (juce::ColourGradient (knobColour.brighter (0.28f), bounds.getTopLeft(),
                                              knobColour.darker (0.55f), bounds.getBottomRight(), false));
@@ -968,9 +971,12 @@ void DB5035AudioProcessorEditor::HardwareLookAndFeel::drawButtonBackground (juce
 
     if (!on)
     {
-        // 阴影：偏移 (2,3)，透明度 0.42
-        g.setColour (juce::Colours::black.withAlpha (0.42f));
-        g.fillEllipse (bounds.translated (2.0f, 3.0f));
+        // 阴影：偏移 (2,3)，3px 虚化
+        for (int i = 3; i >= 0; --i)
+        {
+            g.setColour (juce::Colours::black.withAlpha (0.11f * (4 - i)));
+            g.fillEllipse (bounds.translated (2.0f, 3.0f).expanded ((float) i));
+        }
 
         // 按钮主体：左上亮→右下暗的线性渐变
         g.setGradientFill (juce::ColourGradient (base.brighter (0.18f), bounds.getTopLeft(),
