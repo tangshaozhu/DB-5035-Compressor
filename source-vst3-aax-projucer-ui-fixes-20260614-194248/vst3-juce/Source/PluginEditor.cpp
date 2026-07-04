@@ -410,35 +410,30 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     oversamplingButton.button.setLookAndFeel (&flatCommandLookAndFeel);
     oversamplingButton.name.setVisible (false);
 
-    vuModeButton.setButtonText ("OUT");
+    static const VUMeter::Mode vuModes[] = { VUMeter::Mode::input, VUMeter::Mode::output, VUMeter::Mode::reduction };
+    static const juce::String vuLabels[] = { "IN", "OUT", "RED" };
+    const auto initialVuMode = juce::jlimit (0, 2, audioProcessor.getVuMode());
+    vuMeter.setMode (vuModes[initialVuMode]);
+    vuModeButton.setButtonText (vuLabels[initialVuMode]);
     vuModeButton.setClickingTogglesState (false);
     vuModeButton.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff1c1d1b));
     vuModeButton.setColour (juce::TextButton::buttonOnColourId, cream);
     vuModeButton.setColour (juce::TextButton::textColourOffId, cream);
     vuModeButton.onClick = [this]
     {
+        static const VUMeter::Mode modes[] = { VUMeter::Mode::input, VUMeter::Mode::output, VUMeter::Mode::reduction };
+        static const juce::String labels[] = { "IN", "OUT", "RED" };
         const auto currentMode = vuMeter.getMode();
-        VUMeter::Mode nextMode;
-        juce::String nextLabel;
+        int nextIndex = 0;
 
         if (currentMode == VUMeter::Mode::input)
-        {
-            nextMode = VUMeter::Mode::output;
-            nextLabel = "OUT";
-        }
+            nextIndex = 1;
         else if (currentMode == VUMeter::Mode::output)
-        {
-            nextMode = VUMeter::Mode::reduction;
-            nextLabel = "RED";
-        }
-        else
-        {
-            nextMode = VUMeter::Mode::input;
-            nextLabel = "IN";
-        }
+            nextIndex = 2;
 
-        vuMeter.setMode (nextMode);
-        vuModeButton.setButtonText (nextLabel);
+        vuMeter.setMode (modes[nextIndex]);
+        vuModeButton.setButtonText (labels[nextIndex]);
+        audioProcessor.setVuMode (nextIndex);
     };
 
     scaledContent.addAndMakeVisible (vuMeter);
