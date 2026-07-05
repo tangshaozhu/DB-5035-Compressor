@@ -79,7 +79,7 @@ private:
     private:
         static float dbToNormalised (float dB)
         {
-            constexpr auto meterMin = -20.0f;
+            constexpr auto meterMin = -24.0f;
             constexpr auto meterMax = 3.0f;
             const auto levelMin = std::pow (10.0f, meterMin / 20.0f);
             const auto levelMax = std::pow (10.0f, meterMax / 20.0f);
@@ -201,6 +201,12 @@ private:
     FlatCommandLookAndFeel flatCommandLookAndFeel;
     ScrewLookAndFeel screwLookAndFeel;
     juce::Component scaledContent;
+    juce::ImageComponent panelOverlay;
+    struct TextOverlay final : public juce::Component
+    {
+        void paint (juce::Graphics& g) override;
+        bool hitTest (int, int) override { return false; }
+    } textOverlay;
     std::array<KnobComponent, 6> knobs;
     std::array<juce::String, 6> knobParameterIds;
     std::array<ButtonControl, 3> buttons;

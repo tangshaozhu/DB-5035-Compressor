@@ -440,6 +440,18 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
 
     scaledContent.addAndMakeVisible (vuMeter);
     scaledContent.addAndMakeVisible (vuModeButton);
+
+    static const auto panelImage = juce::ImageCache::getFromMemory (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
+    if (panelImage.isValid())
+    {
+        panelOverlay.setImage (panelImage, juce::RectanglePlacement::stretchToFit);
+        panelOverlay.setAlpha (1.0f);
+        scaledContent.addAndMakeVisible (panelOverlay);
+        panelOverlay.toFront (false);
+    }
+
+    scaledContent.addAndMakeVisible (textOverlay);
+    textOverlay.setPaintingIsUnclipped (true);
     vuMeter.onResetPeak = [this]
     {
         gainReductionPeakHoldDb = 0.0f;
@@ -473,46 +485,7 @@ DB5035AudioProcessorEditor::~DB5035AudioProcessorEditor()
 void DB5035AudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (background);
-
-    juce::Graphics::ScopedSaveState state (g);
-    g.addTransform (getContentTransform (getLocalBounds()));
-
-    const auto scale = getContentScale (getLocalBounds());
-    const auto panelH = juce::jmax (designHeight, juce::roundToInt (((float) getHeight() - (float) commandStripHeight) / scale));
-    const auto panelBounds = juce::Rectangle<int> (0, 0, designWidth, panelH);
-
-    // 用 neve_pad2.png 绘制主面板背景，缩放到与面板同宽
-    static const auto panelImage = juce::ImageCache::getFromMemory (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
-    if (panelImage.isValid())
-        g.drawImageWithin (panelImage, panelBounds.getX(), panelBounds.getY(),
-                           panelBounds.getWidth(), panelBounds.getHeight(),
-                           juce::RectanglePlacement::xLeft | juce::RectanglePlacement::yTop
-                         | juce::RectanglePlacement::stretchToFit);
-    else
-        drawHardwareFrame (g, panelBounds);
-
-    const int titleX = 26;
-    const int titleY = 75;
-    const int titleLineH = 28;
-
-    const auto titleFont = juce::Font (juce::FontOptions ("MyriadPro-Regular", 25.37f, juce::Font::plain));
-    const auto subFont = juce::Font (juce::FontOptions ("MyriadPro-LightIt", 12.7f, juce::Font::plain));
-    const auto titleW = titleFont.getStringWidth ("SHELFORD");
-    const auto subW = subFont.getStringWidth ("D I O D E  B R I D G E");
-    const auto maxW = (float) juce::jmax (titleW, subW);
-    const auto cx = (float) titleX + maxW / 2.0f;
-
-    g.setColour (text);
-    g.setFont (titleFont);
-    g.drawText ("SHELFORD", juce::roundToInt (cx - titleW / 2.0f), titleY, titleW + 2, titleLineH, juce::Justification::centredLeft);
-
-    g.setColour (muted);
-    g.setFont (subFont);
-    g.drawFittedText ("D I O D E  B R I D G E\nC O M P R E S S O R",
-                       juce::roundToInt (cx - subW / 2.0f), titleY + titleLineH, subW + 2, titleLineH,
-                       juce::Justification::centredLeft, 2);
-
-    drawSignature (g, panelBounds.reduced (24));}
+}
 
 void DB5035AudioProcessorEditor::resized()
 {
@@ -547,8 +520,57 @@ void DB5035AudioProcessorEditor::layoutContent()
     knobs[3].setBounds (530, 26, 155, 120);
     knobs[5].setBounds (620, 90, 155, 120);
 
-    vuMeter.setBounds (775, 24, 192, 88);
+    vuMeter.setBounds (774, 24, 190, 84);
     vuModeButton.setBounds (835, 155, 70, 56);
+    panelOverlay.setBounds (0, 0, designWidth, designHeight);
+    textOverlay.setBounds (0, 0, designWidth, designHeight);
+
+    vuMeter.toBack();
+    panelOverlay.toFront (false);
+    for (auto& k : knobs) k.toFront (false);
+    for (auto& b : buttons) { b.name.toFront (false); b.button.toFront (false); }
+    vuModeButton.toFront (false);
+    textOverlay.toFront (false);
+}
+
+void DB5035AudioProcessorEditor::TextOverlay::paint (juce::Graphics& g)
+{
+    const int titleX = 26;
+    const int titleY = 75;
+    const int titleLineH = 28;
+
+    const auto titleFont = juce::Font (juce::FontOptions ("MyriadPro-Regular", 25.37f, juce::Font::plain));
+    const auto subFont = juce::Font (juce::FontOptions ("MyriadPro-LightIt", 12.7f, juce::Font::plain));
+    const auto titleW = titleFont.getStringWidth ("SHELFORD");
+    const auto subW = subFont.getStringWidth ("D I O D E  B R I D G E");
+    const auto maxW = (float) juce::jmax (titleW, subW);
+    const auto cx = (float) titleX + maxW / 2.0f;
+
+    g.setColour (text);
+    g.setFont (titleFont);
+    g.drawText ("SHELFORD", juce::roundToInt (cx - titleW / 2.0f), titleY, titleW + 2, titleLineH, juce::Justification::centredLeft);
+
+    g.setColour (muted);
+    g.setFont (subFont);
+    g.drawFittedText ("D I O D E  B R I D G E\nC O M P R E S S O R",
+                       juce::roundToInt (cx - subW / 2.0f), titleY + titleLineH, subW + 2, titleLineH,
+                       juce::Justification::centredLeft, 2);
+
+    auto signatureArea = juce::Rectangle<int> (1080, 54, 58, 71);
+    juce::Graphics::ScopedSaveState state (g);
+    g.addTransform (juce::AffineTransform::rotation (-0.10f,
+                                                     (float) signatureArea.getCentreX(),
+                                                     (float) signatureArea.getCentreY()));
+    const auto signatureText = juce::String::fromUTF8 ("\xe9\x9d\x92");
+    auto inkArea = signatureArea.reduced (4, 4).translated (-3, 0);
+    const auto signatureFont = juce::FontOptions (signatureTypefaceName(), 52.0f, juce::Font::plain);
+    g.setFont (signatureFont);
+    g.setColour (panelDark.withAlpha (0.26f));
+    g.drawFittedText (signatureText, inkArea.translated (2, 2), juce::Justification::centred, 1);
+    g.setColour (cream.withAlpha (0.70f));
+    g.drawFittedText (signatureText, inkArea, juce::Justification::centred, 1);
+    g.setColour (cream.withAlpha (0.18f));
+    g.drawFittedText (signatureText, inkArea.translated (-1, 0), juce::Justification::centred, 1);
 }
 
 void DB5035AudioProcessorEditor::layoutCommandStrip()
@@ -577,10 +599,10 @@ void DB5035AudioProcessorEditor::timerCallback()
     switch (vuMeter.getMode())
     {
         case VUMeter::Mode::input:
-            vuMeter.setValue (meters.inputDb, -20.0f, 3.0f);
+            vuMeter.setValue (meters.inputDb, -24.0f, 3.0f);
             break;
         case VUMeter::Mode::output:
-            vuMeter.setValue (meters.outputDb, -20.0f, 3.0f);
+            vuMeter.setValue (meters.outputDb, -24.0f, 3.0f);
             break;
         case VUMeter::Mode::reduction:
             vuMeter.setPeakHold (gainReductionPeakHoldDb);
@@ -1186,7 +1208,51 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
         juce::Path redArc;
         redArc.addCentredArc (centre.x, centre.y, arcLineR, arcLineR, 0.0f, zeroAngle + halfPi, endAngle + halfPi, true);
         g.setColour (juce::Colour (0xffcc4444));
-        g.strokePath (redArc, juce::PathStrokeType (3.0f));
+        g.strokePath (redArc, juce::PathStrokeType (4.0f));
+
+        // “-” 和 “+” 标记
+        const auto minusAngle = startAngle;
+        const auto minusX = centre.x + std::cos (minusAngle) * tickInnerR;
+        const auto minusY = centre.y + std::sin (minusAngle) * tickInnerR;
+        g.setColour (juce::Colour (0xff2a2520));
+        g.drawLine (minusX - 3.0f, minusY + 8.0f, minusX + 3.0f, minusY + 8.0f, 1.0f);
+
+        const auto plusAngle = endAngle;
+        const auto plusX = centre.x + std::cos (plusAngle) * tickInnerR;
+        const auto plusY = centre.y + std::sin (plusAngle) * tickInnerR;
+        g.setColour (juce::Colour (0xffcc4444));
+        g.drawLine (plusX - 3.0f, plusY + 8.0f, plusX + 3.0f, plusY + 8.0f, 1.0f);
+        g.drawLine (plusX, plusY + 5.0f, plusX, plusY + 11.0f, 1.0f);
+    }
+
+    // -24dB tick
+    {
+        const auto shortOuterR = tickInnerR + 4.0f;
+        const auto oX = centre.x + std::cos (startAngle) * shortOuterR;
+        const auto oY = centre.y + std::sin (startAngle) * shortOuterR;
+        const auto iX = centre.x + std::cos (startAngle) * (tickInnerR + 0.5f);
+        const auto iY = centre.y + std::sin (startAngle) * (tickInnerR + 0.5f);
+        g.setColour (juce::Colour (0xff2a2520));
+        g.drawLine (iX, iY, oX, oY, 1.2f);
+    }
+
+    // short ticks: -6, -4, -0.5, +0.5
+    {
+        static const float shortDbValues[] = { -6.0f, -4.0f, -0.5f, 0.5f };
+        const auto shortInnerR = tickInnerR + 0.5f;
+        const auto shortOuterR2 = tickInnerR + 4.0f;
+        for (float db : shortDbValues)
+        {
+            const auto norm = dbToNormalised (db);
+            const auto angle = startAngle + norm * totalSweep;
+            const auto oX = centre.x + std::cos (angle) * shortOuterR2;
+            const auto oY = centre.y + std::sin (angle) * shortOuterR2;
+            const auto iX = centre.x + std::cos (angle) * shortInnerR;
+            const auto iY = centre.y + std::sin (angle) * shortInnerR;
+            const bool inRedZone = norm > dbToNormalised (0.0f);
+            g.setColour (inRedZone ? juce::Colour (0xffcc4444) : juce::Colour (0xff2a2520));
+            g.drawLine (iX, iY, oX, oY, 1.0f);
+        }
     }
 
     static const int dbValues[] = { -20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3 };
@@ -1194,10 +1260,12 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     {
         const auto norm = dbToNormalised ((float) db);
         const auto angle = startAngle + norm * totalSweep;
+        const auto isEndTick = (db == 3);
+        const auto thisInnerR = isEndTick ? tickInnerR - 2.0f : tickInnerR + 1.0f;
         const auto outerX = centre.x + std::cos (angle) * tickOuterR;
         const auto outerY = centre.y + std::sin (angle) * tickOuterR;
-        const auto innerX = centre.x + std::cos (angle) * tickInnerR;
-        const auto innerY = centre.y + std::sin (angle) * tickInnerR;
+        const auto innerX = centre.x + std::cos (angle) * thisInnerR;
+        const auto innerY = centre.y + std::sin (angle) * thisInnerR;
 
         const bool inRedZone = norm > dbToNormalised (0.0f);
         g.setColour (inRedZone ? juce::Colour (0xffcc4444) : juce::Colour (0xff2a2520));
@@ -1222,6 +1290,15 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     g.drawText ("dB",
                  juce::roundToInt (centre.x) - 16, juce::roundToInt (centre.y - radius * 0.16f), 32, 12,
                  juce::Justification::centred);
+
+    {
+        const auto vuAngle = startAngle;
+        const auto vuX = centre.x + std::cos (vuAngle) * tickOuterR;
+        const auto vuY = bounds.getY() + 25.0f;
+        g.setFont (juce::FontOptions ("MyriadPro-Regular", 11.0f, juce::Font::plain));
+        g.setColour (juce::Colour (0xff2a2520));
+        g.drawText ("VU", juce::roundToInt (vuX) - 12, juce::roundToInt (vuY) - 16, 24, 12, juce::Justification::centred);
+    }
 
     const auto needleAngle = smoothedAngle;
     const auto needleLength = arcRadius - 2.0f;
