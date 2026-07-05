@@ -337,7 +337,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     configureKnob (knobs[4], knobParameterIds[4], "S/C HPF", blackKnob, rotaryStart, rotaryEnd, false);
     configureKnob (knobs[5], knobParameterIds[5], "BLEND %", creamKnob, rotaryStart, rotaryEnd, false);
 
-    knobs[0].scaleLabels = juce::StringArray { "-25", "", "-18", "", "", "-2", "", "", "+12","", "+20" };
+    knobs[0].scaleLabels = juce::StringArray { "-25", "", "-16", "", "", "-2", "", "", "+11","", "+20" };
     knobs[0].scaleTickCount = 16;
     knobs[1].scaleLabels = juce::StringArray { "1.5:1", "2:1", "3:1", "4:1", "6:1", "8:1" };
     knobs[1].scaleTickCount = 6;
@@ -345,7 +345,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     knobs[2].scaleTickCount = 16;
     knobs[3].scaleLabels = juce::StringArray { "FAST", "MF", "MED", "MS", "SLOW", "AUTO" };
     knobs[3].scaleTickCount = 6;
-    knobs[4].scaleLabels = juce::StringArray { "20", "300" };
+    knobs[4].scaleLabels = juce::StringArray { "20Hz", "300Hz" };
     knobs[4].scaleTickCount = 16;
     knobs[5].scaleLabels = juce::StringArray { "0", "50", "100" };
     knobs[5].scaleTickCount = 16;
@@ -615,7 +615,7 @@ void DB5035AudioProcessorEditor::configureKnob (KnobComponent& control,
     styleLabel (control.nameLabel, labelText);
     control.valueLabel.setJustificationType (juce::Justification::centred);
     control.valueLabel.setColour (juce::Label::textColourId, text);
-    control.valueLabel.setFont (uiFont (10.0f, juce::Font::bold));
+    control.valueLabel.setFont (uiFont (12.0f, juce::Font::plain));
     control.valueLabel.setEditable (false, true, false);
     control.valueLabel.setColour (juce::Label::backgroundWhenEditingColourId, juce::Colour (0xcc11110f));
     control.valueLabel.setColour (juce::Label::textWhenEditingColourId, text);
@@ -1086,7 +1086,7 @@ void DB5035AudioProcessorEditor::FlatCommandLookAndFeel::drawButtonText (juce::G
         return;
 
     g.setColour (button.isEnabled() ? cream : muted.withAlpha (0.45f));
-    g.setFont (uiFont (12.0f));
+    g.setFont (uiFont (14.0f));
     g.drawText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred);
 }
 
