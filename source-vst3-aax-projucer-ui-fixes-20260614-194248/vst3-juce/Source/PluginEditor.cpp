@@ -440,7 +440,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     scaledContent.addAndMakeVisible (vuMeter);
     scaledContent.addAndMakeVisible (vuModeButton);
 
-    static const auto panelImage = juce::ImageCache::getFromMemory (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
+    auto panelImage = juce::ImageFileFormat::loadFrom (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
     if (panelImage.isValid())
     {
         panelOverlay.setImage (panelImage, juce::RectanglePlacement::stretchToFit);
