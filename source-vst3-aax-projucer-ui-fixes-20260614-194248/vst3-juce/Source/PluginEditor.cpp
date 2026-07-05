@@ -556,21 +556,7 @@ void DB5035AudioProcessorEditor::TextOverlay::paint (juce::Graphics& g)
                        juce::roundToInt (cx - subW / 2.0f), titleY + titleLineH, subW + 2, titleLineH,
                        juce::Justification::centredLeft, 2);
 
-    auto signatureArea = juce::Rectangle<int> (1080, 54, 58, 71);
-    juce::Graphics::ScopedSaveState state (g);
-    g.addTransform (juce::AffineTransform::rotation (-0.10f,
-                                                     (float) signatureArea.getCentreX(),
-                                                     (float) signatureArea.getCentreY()));
-    const auto signatureText = juce::String::fromUTF8 ("\xe9\x9d\x92");
-    auto inkArea = signatureArea.reduced (4, 4).translated (-3, 0);
-    const auto signatureFont = juce::FontOptions (signatureTypefaceName(), 52.0f, juce::Font::plain);
-    g.setFont (signatureFont);
-    g.setColour (panelDark.withAlpha (0.26f));
-    g.drawFittedText (signatureText, inkArea.translated (2, 2), juce::Justification::centred, 1);
-    g.setColour (cream.withAlpha (0.70f));
-    g.drawFittedText (signatureText, inkArea, juce::Justification::centred, 1);
-    g.setColour (cream.withAlpha (0.18f));
-    g.drawFittedText (signatureText, inkArea.translated (-1, 0), juce::Justification::centred, 1);
+    DB5035AudioProcessorEditor::drawSignature (g, getLocalBounds());
 }
 
 void DB5035AudioProcessorEditor::layoutCommandStrip()
@@ -782,7 +768,7 @@ void DB5035AudioProcessorEditor::drawHardwareFrame (juce::Graphics& g, juce::Rec
 
 void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g, juce::Rectangle<int> bounds)
 {
-    auto signatureArea = juce::Rectangle<int> (1080, 62, 58, 71);
+    auto signatureArea = juce::Rectangle<int> (1085, 42, 58, 71);
 
     juce::Graphics::ScopedSaveState state (g);
     g.addTransform (juce::AffineTransform::rotation (-0.10f,
@@ -1078,10 +1064,10 @@ void DB5035AudioProcessorEditor::ScrewLookAndFeel::drawButtonText (juce::Graphic
         return;
 
     const auto bounds = button.getLocalBounds().toFloat();
-    const auto textY = 30.0f;
+    const auto textY = 29.0f;
 
     g.setColour (juce::Colours::white);
-    g.setFont (juce::FontOptions ("MyriadPro-Regular", 11.3f, juce::Font::plain));
+    g.setFont (juce::FontOptions ("MyriadPro-Regular", 13.3f, juce::Font::plain));
     g.drawText (button.getButtonText(), bounds.withTop ((int) textY).toNearestInt(), juce::Justification::centredTop);
 }
 
