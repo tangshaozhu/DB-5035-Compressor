@@ -19,7 +19,6 @@ namespace
     const auto creamKnob = juce::Colour (0xffccd1db);
     const auto amber = juce::Colour (0xffffcc22);
     const auto green = juce::Colour (0xff22ee22);
-    const auto red = juce::Colour (0xffd65245);
 
     constexpr auto rotaryStart = juce::MathConstants<float>::pi * 20.f / 30.f;
     constexpr auto rotaryEnd = juce::MathConstants<float>::pi * 70.f / 30.f;
@@ -556,7 +555,7 @@ void DB5035AudioProcessorEditor::TextOverlay::paint (juce::Graphics& g)
                        juce::roundToInt (cx - subW / 2.0f), titleY + titleLineH, subW + 2, titleLineH,
                        juce::Justification::centredLeft, 2);
 
-    DB5035AudioProcessorEditor::drawSignature (g, getLocalBounds());
+    DB5035AudioProcessorEditor::drawSignature (g);
 }
 
 void DB5035AudioProcessorEditor::layoutCommandStrip()
@@ -753,20 +752,7 @@ void DB5035AudioProcessorEditor::KnobComponent::resized()
     valueLabel.setBounds (sliderCentre.x - 30, sliderCentre.y - 10, 60, 20);
 }
 
-void DB5035AudioProcessorEditor::drawHardwareFrame (juce::Graphics& g, juce::Rectangle<int> bounds)
-{
-    g.setGradientFill (juce::ColourGradient (panelTop, bounds.getTopLeft().toFloat(),
-                                             panel, bounds.getBottomLeft().toFloat(), false));
-    g.fillRoundedRectangle (bounds.toFloat(), 4.0f);
-
-    g.setColour (juce::Colour (0xff565650));
-    g.drawRoundedRectangle (bounds.toFloat(), 4.0f, 1.0f);
-
-    g.setColour (juce::Colours::black.withAlpha (0.32f));
-    g.fillRect (bounds.removeFromBottom (16));
-}
-
-void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g, juce::Rectangle<int> bounds)
+void DB5035AudioProcessorEditor::drawSignature (juce::Graphics& g)
 {
     auto signatureArea = juce::Rectangle<int> (1085, 42, 58, 71);
 

@@ -203,8 +203,8 @@ private:
     void layoutContent();
     void layoutCommandStrip();
     void layoutButton (ButtonControl& control, juce::Rectangle<int> bounds);
-    void drawHardwareFrame (juce::Graphics& g, juce::Rectangle<int> bounds);
-    static void drawSignature (juce::Graphics& g, juce::Rectangle<int> bounds);
+
+    static void drawSignature (juce::Graphics& g);
 
     void updateValueLabels();
     void updateUndoRedoButtons();
