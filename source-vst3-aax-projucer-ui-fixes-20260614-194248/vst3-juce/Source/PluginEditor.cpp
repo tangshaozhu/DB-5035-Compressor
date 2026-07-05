@@ -1251,7 +1251,7 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
 
         juce::Graphics::ScopedSaveState textState (g);
         g.addTransform (juce::AffineTransform::rotation (textRotation, lx, ly));
-        g.setFont (juce::FontOptions ("Futura", 9.0f, juce::Font::plain));
+        g.setFont (juce::FontOptions ("MyriadPro-Regular", 9.0f, juce::Font::plain));
         g.setColour (inRedZone ? juce::Colour (0xffcc4444) : juce::Colour (0xff2a2520));
         g.drawText (label,
                      juce::roundToInt (lx) - 16, juce::roundToInt (ly) - 6, 32, 12,
