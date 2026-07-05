@@ -445,6 +445,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     {
         panelOverlay.setImage (panelImage, juce::RectanglePlacement::stretchToFit);
         panelOverlay.setAlpha (1.0f);
+        panelOverlay.setInterceptsMouseClicks (false, false);
         scaledContent.addAndMakeVisible (panelOverlay);
         panelOverlay.toFront (false);
     }
@@ -1283,13 +1284,13 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
     g.setColour (juce::Colour (0xff1a1a1a));
     g.drawLine (centre.x, centre.y, needleTipX, needleTipY, 1.0f);
 
-    g.setFont (monoFont (10.0f, juce::Font::bold));
+    g.setFont (juce::FontOptions ("Century Gothic", 12.0f, juce::Font::bold));
     g.setColour (juce::Colour (0xff2a2520));
     juce::String valueLabel;
     if (isReduction)
         valueLabel = juce::String (valueDb, 1) + (showPeakHold ? " | " + juce::String (heldPeakDb, 1) : "") + " dB";
     else
         valueLabel = juce::String (valueDb, 1) + " dB";
-    g.drawText (valueLabel, juce::roundToInt (meterBounds.getX()), juce::roundToInt (meterBounds.getBottom() - 16.0f), juce::roundToInt (meterBounds.getWidth()), 14,
+    g.drawText (valueLabel, juce::roundToInt (meterBounds.getX()), juce::roundToInt (meterBounds.getBottom() - 18.0f), juce::roundToInt (meterBounds.getWidth()), 14,
                 juce::Justification::centred);
 }
