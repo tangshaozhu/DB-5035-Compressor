@@ -628,7 +628,7 @@ void DB5035AudioProcessorEditor::configureKnob (KnobComponent& control,
     control.slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     control.slider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
     control.slider.setRotaryParameters (startAngle, endAngle, true);
-    control.slider.setMouseDragSensitivity (520);
+    control.slider.setMouseDragSensitivity (280);
     control.slider.setVelocityModeParameters (0.32, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
     control.slider.setColour (juce::Slider::thumbColourId, knobColour);
     control.slider.setColour (juce::Slider::rotarySliderFillColourId, amber);
