@@ -462,7 +462,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     setLookAndFeel (&hardwareLookAndFeel);
     setResizable (true, true);
     setResizeLimits (400, 100, 1920, 1200);
-    getConstrainer()->setFixedAspectRatio ((double) designWidth / (double) (designHeight + commandStripHeight));
+    setConstrainer (&panelConstrainer);
     setSize (designWidth, designHeight + commandStripHeight);
     startTimerHz (30);
     updateValueLabels();

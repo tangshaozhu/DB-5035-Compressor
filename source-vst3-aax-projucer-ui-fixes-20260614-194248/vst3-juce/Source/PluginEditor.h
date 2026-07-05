@@ -6,6 +6,21 @@
 #include <memory>
 #include "PluginProcessor.h"
 
+class PanelConstrainer : public juce::ComponentBoundsConstrainer
+{
+public:
+    void checkBounds (juce::Rectangle<int>& bounds,
+                      const juce::Rectangle<int>&,
+                      const juce::Rectangle<int>& limits,
+                      bool, bool, bool, bool) override
+    {
+        bounds = bounds.constrainedWithin (limits);
+        const auto scale = (float) bounds.getWidth() / (float) 1200;
+        const auto h = 28 + juce::roundToInt ((float) 199 * scale);
+        bounds = bounds.withHeight (h);
+    }
+};
+
 class DB5035AudioProcessorEditor final : public juce::AudioProcessorEditor,
                                         private juce::Timer
 {
@@ -197,6 +212,7 @@ private:
     void updateOversamplingButton();
 
     DB5035AudioProcessor& audioProcessor;
+    PanelConstrainer panelConstrainer;
     HardwareLookAndFeel hardwareLookAndFeel;
     FlatCommandLookAndFeel flatCommandLookAndFeel;
     ScrewLookAndFeel screwLookAndFeel;
