@@ -38,7 +38,9 @@ juce_add_plugin(DB5035Compressor
 
 juce_add_binary_data(DB5035Resources
     SOURCES
-        Source/Resources/neve_pad2.png
+        Source/Resources/panel.png
+        Source/Resources/OpenSans-Regular.ttf
+        Source/Resources/OpenSans-LightItalic.ttf
 )
 
 juce_generate_juce_header(DB5035Compressor)

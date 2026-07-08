@@ -70,6 +70,33 @@ namespace
        #endif
     }
 
+    juce::Typeface::Ptr sourceSansRegular()
+    {
+        static auto typeface = juce::Typeface::createSystemTypefaceFor (BinaryData::OpenSansRegular_ttf, BinaryData::OpenSansRegular_ttfSize);
+        return typeface;
+    }
+
+    juce::Typeface::Ptr sourceSansLightItalic()
+    {
+        static auto typeface = juce::Typeface::createSystemTypefaceFor (BinaryData::OpenSansLightItalic_ttf, BinaryData::OpenSansLightItalic_ttfSize);
+        return typeface;
+    }
+
+    juce::Font sourceSansFont (float size, int styleFlags = juce::Font::plain)
+    {
+        auto f = juce::Font (sourceSansRegular());
+        f.setHeight (size * 1.2f);
+        f.setStyleFlags (styleFlags);
+        return f;
+    }
+
+    juce::Font sourceSansLightItalicFont (float size)
+    {
+        auto f = juce::Font (sourceSansLightItalic());
+        f.setHeight (size * 1.2f);
+        return f;
+    }
+
     juce::FontOptions uiFont (float size, int styleFlags = juce::Font::plain)
     {
         return juce::FontOptions (uiTypefaceName(), size, styleFlags);
@@ -85,8 +112,7 @@ namespace
         label.setText (labelText, juce::dontSendNotification);
         label.setJustificationType (justification);
         label.setColour (juce::Label::textColourId, muted);
-        constexpr char* fontName = "MyriadPro-Regular";
-        label.setFont (juce::FontOptions (fontName, 11.3f, juce::Font::plain));
+        label.setFont (sourceSansFont (11.3f));
     }
 
     juce::String formatValue (const juce::RangedAudioParameter& parameter)
@@ -440,7 +466,7 @@ DB5035AudioProcessorEditor::DB5035AudioProcessorEditor (DB5035AudioProcessor& pr
     scaledContent.addAndMakeVisible (vuMeter);
     scaledContent.addAndMakeVisible (vuModeButton);
 
-    auto panelImage = juce::ImageFileFormat::loadFrom (BinaryData::neve_pad2_png, BinaryData::neve_pad2_pngSize);
+    auto panelImage = juce::ImageFileFormat::loadFrom (BinaryData::panel_png, BinaryData::panel_pngSize);
     if (panelImage.isValid())
     {
         panelOverlay.setImage (panelImage, juce::RectanglePlacement::stretchToFit);
@@ -539,16 +565,16 @@ void DB5035AudioProcessorEditor::TextOverlay::paint (juce::Graphics& g)
     const int titleY = 75;
     const int titleLineH = 28;
 
-    const auto titleFont = juce::Font (juce::FontOptions ("MyriadPro-Regular", 25.37f, juce::Font::plain));
-    const auto subFont = juce::Font (juce::FontOptions ("MyriadPro-LightIt", 12.7f, juce::Font::plain));
-    const auto titleW = titleFont.getStringWidth ("SHELFORD");
+    const auto titleFont = sourceSansFont (25.37f);
+    const auto subFont = sourceSansLightItalicFont (12.7f);
+    const auto titleW = titleFont.getStringWidth ("DB-5035");
     const auto subW = subFont.getStringWidth ("D I O D E  B R I D G E");
     const auto maxW = (float) juce::jmax (titleW, subW);
     const auto cx = (float) titleX + maxW / 2.0f;
 
     g.setColour (text);
     g.setFont (titleFont);
-    g.drawText ("SHELFORD", juce::roundToInt (cx - titleW / 2.0f), titleY, titleW + 2, titleLineH, juce::Justification::centredLeft);
+    g.drawText ("DB-5035", juce::roundToInt (cx - titleW / 2.0f), titleY, titleW + 2, titleLineH, juce::Justification::centredLeft);
 
     g.setColour (muted);
     g.setFont (subFont);
@@ -1054,7 +1080,7 @@ void DB5035AudioProcessorEditor::ScrewLookAndFeel::drawButtonText (juce::Graphic
     const auto textY = 29.0f;
 
     g.setColour (juce::Colours::white);
-    g.setFont (juce::FontOptions ("MyriadPro-Regular", 13.3f, juce::Font::plain));
+    g.setFont (sourceSansFont (13.3f));
     g.drawText (button.getButtonText(), bounds.withTop ((int) textY).toNearestInt(), juce::Justification::centredTop);
 }
 
@@ -1251,7 +1277,7 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
 
         juce::Graphics::ScopedSaveState textState (g);
         g.addTransform (juce::AffineTransform::rotation (textRotation, lx, ly));
-        g.setFont (juce::FontOptions ("MyriadPro-Regular", 9.0f, juce::Font::plain));
+        g.setFont (juce::FontOptions ("Century Gothic", 9.0f, juce::Font::plain));
         g.setColour (inRedZone ? juce::Colour (0xffcc4444) : juce::Colour (0xff2a2520));
         g.drawText (label,
                      juce::roundToInt (lx) - 16, juce::roundToInt (ly) - 6, 32, 12,
@@ -1268,7 +1294,7 @@ void DB5035AudioProcessorEditor::VUMeter::paint (juce::Graphics& g)
         const auto vuAngle = startAngle;
         const auto vuX = centre.x + std::cos (vuAngle) * tickOuterR;
         const auto vuY = bounds.getY() + 25.0f;
-        g.setFont (juce::FontOptions ("MyriadPro-Regular", 11.0f, juce::Font::plain));
+        g.setFont (sourceSansFont (11.0f));
         g.setColour (juce::Colour (0xff2a2520));
         g.drawText ("VU", juce::roundToInt (vuX) - 12, juce::roundToInt (vuY) - 16, 24, 12, juce::Justification::centred);
     }
